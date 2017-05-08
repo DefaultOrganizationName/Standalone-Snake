@@ -1,5 +1,5 @@
 CC      = gcc
-CFLAGS  = -Wall -fno-builtin -nostdinc -nostdlib
+CFLAGS  = -m32 -Wall -fno-builtin -nostdinc -nostdlib
 LD      = ld
 
 OBJFILES = \
@@ -18,8 +18,8 @@ image:
 
 	@echo "Mounting partition to /dev/loop2..."
 	@losetup /dev/loop2 ./hdd.img \
-    --offset    32256 \
-    --sizelimit 8224768
+    --offset    `echo \`fdisk -lu /dev/loop1 | tail -n1 | awk '{print $$3}'\`*512 | bc` \
+    --sizelimit `echo \`fdisk -lu /dev/loop1 | tail -n1 | awk '{print $$4}'\`*512 | bc`
 	@losetup -d /dev/loop1
 
 	@echo "Format partition..."
@@ -32,6 +32,7 @@ image:
 	@cp -r grub tempdir/boot/
 	@cp kernel.bin tempdir/
 	@sleep 1
+	
 	@umount /dev/loop2
 	@rm -r tempdir
 	@losetup -d /dev/loop2
@@ -46,10 +47,10 @@ image:
 all: kernel.bin
 rebuild: clean all
 .s.o:
-	as -o $@ $<
+	as --32 -o $@ $<
 .c.o:
 	$(CC) -Iinclude $(CFLAGS) -o $@ -c $<
 kernel.bin: $(OBJFILES)
-	$(LD) -T linker.ld -o $@ $^
+	$(LD) -m elf_i386 -T linker.ld -o $@ $^
 clean:
 	rm -f $(OBJFILES) hdd.img kernel.bin
