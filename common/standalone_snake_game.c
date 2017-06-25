@@ -50,9 +50,10 @@ static void drow() {
 static char get_key_pressed() {
 	static int cnt = 0;
 	cnt++;
-	if (cnt >=19 && 20 > cnt) return 's';
-	if (cnt >= 20 && 29 > cnt) return 'a';
-	if (cnt >= 29 && 45 > cnt) return 'w';
+	if (cnt >= 16 && 27 > cnt) return 's';
+	if (cnt >= 27 && 45 > cnt) return 'a';
+	if (cnt >= 45 && 60 > cnt) return 'w';
+	if (cnt == 60) cnt = 0;
 	return 'd';
 }
 
@@ -93,14 +94,14 @@ static void move() {
 	return;
 }
 
-void give_food() {
+static void give_food() {
 	// food_x = 1 + (head_x + 100) % (FIELD_LEN - 2);
 	// food_y = 1 + (head_y + 100) % (FIELD_HEIGHT - 2);
 	food_x = 1 + (head_x + 1) % (FIELD_LEN - 2);
 	food_y = head_y;
 }
 
-void snake_grow() {
+static void snake_grow() {
 	snake_x[len] = snake_x[len - 1];
 	snake_y[len] = snake_y[len - 1];
 	len++;
@@ -117,8 +118,6 @@ static int check() {
 }
 
 static void init() {
-	for (int i = 0; i < (int)1e3 - 1; i++) snake_x[i] = -1;
-	for (int i = 0; i < (int)1e3 - 1; i++) snake_y[i] = -1;
 	head_x = FIELD_LEN / 2;
 	head_y = FIELD_HEIGHT / 2;
 	give_food();
@@ -130,7 +129,7 @@ static void init() {
 	ok = 1;
 }
 
-void very_bad_sleep() {
+static void very_bad_sleep() {
 	int j = 0;
 	for (int i = 0; i < (int) 2e7; i++) {
 		j++;
