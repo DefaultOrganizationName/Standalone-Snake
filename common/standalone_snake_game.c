@@ -31,11 +31,9 @@ static void drow_field() {
 	for (int i = 1; i < FIELD_HEIGHT - 1; i++) {
 		putchar(FENCE);
 		for (int j = 1; j < FIELD_LEN - 1; j++) {
-			if (is[i][j] == 1) {
-				if (j == head_x && i == head_y) putchar(SNAKE_HEAD);
-				else putchar(SNAKE_BODY);
-			} 
+			if (j == head_x && i == head_y) putchar(SNAKE_HEAD);
 			else if (i == food_y && j == food_x) putchar(FOOD);
+			else if (is[i][j] == 1) putchar(SNAKE_BODY);
 			else putchar(' ');
 		}
 		putchar(FENCE);
@@ -52,9 +50,9 @@ static void drow() {
 static char get_key_pressed() {
 	static int cnt = 0;
 	cnt++;
-	if (cnt >=13 && 20 > cnt) return 's';
-	if (cnt >= 20 && 30 > cnt) return 'a';
-	if (cnt >= 30 && 45 > cnt) return 'w';
+	if (cnt >=19 && 20 > cnt) return 's';
+	if (cnt >= 20 && 29 > cnt) return 'a';
+	if (cnt >= 29 && 45 > cnt) return 'w';
 	return 'd';
 }
 
@@ -66,12 +64,28 @@ static void update_snake(int *snake, int new_head) {
 	snake[0] = new_head;
 }
 
+static inline void self_eat_check(int y, int x) {
+	if (is[y][x] == 1) ok = 0;
+}
+
 static void move() {
 	char button = get_key_pressed();
-	if (button == 'w')		head_y--;	
-	else if (button == 's')	head_y++;
-	else if (button == 'd') head_x++;
-	else if (button == 'a') head_x--;
+	if (button == 'w')	{
+		self_eat_check(head_y - 1, head_x);
+		head_y--;	
+	}
+	else if (button == 's')	{
+		self_eat_check(head_y + 1, head_x);
+		head_y++;
+	}
+	else if (button == 'd') {
+		self_eat_check(head_y, head_x + 1);
+		head_x++;
+	}
+	else if (button == 'a') {
+		self_eat_check(head_y, head_x - 1);
+		head_x--;
+	}
 	is[snake_y[len - 1]][snake_x [len- 1]] = 0;
 	update_snake(&snake_x[0], head_x);
 	update_snake(&snake_y[0], head_y);
@@ -93,7 +107,7 @@ void snake_grow() {
 }
 
 static int check() {
-	if (head_x <= 0 || head_x >= FIELD_LEN || head_y <= 0 || head_y >= FIELD_HEIGHT) return 0;
+	if (head_x <= 0 || head_x >= FIELD_LEN || head_y <= 0 || head_y >= FIELD_HEIGHT || ok <= 0) return 0;
 	if (head_x == food_x && head_y == food_y) {
 		points++;
 		snake_grow();
@@ -113,6 +127,7 @@ static void init() {
 	snake_y[0] = head_y;
 	len = 1;
 	points = 0;
+	ok = 1;
 }
 
 void very_bad_sleep() {
@@ -128,7 +143,12 @@ void start_snake() {
 		very_bad_sleep();
 		drow();
 		move();
-		if (check() <= 0) break;
+		if (check() <= 0) {
+			break;
+		}
 	}
+	drow();
+	very_bad_sleep();
+	very_bad_sleep();
 	clear_screen();
 }
