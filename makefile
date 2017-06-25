@@ -6,6 +6,7 @@ OBJFILES = \
 	loader.o  \
 	common/printf.o  \
 	common/screen.o  \
+	common/standalone_snake_game.o \
 	kernel.o
 
 image:
