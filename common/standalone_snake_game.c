@@ -4,7 +4,7 @@ int head_x;
 int head_y;
 int len;
 
-int is[MAX_ROW][MAX_COL];
+int is[MAX_ROW + 10][MAX_COL + 10];
 
 int snake_x[(int)1e3];
 int snake_y[(int)1e3];
@@ -65,12 +65,15 @@ static void update_snake(int *snake, int new_head) {
 	snake[0] = new_head;
 }
 
+int need_update;
 static inline void self_eat_check(int y, int x) {
 	if (is[y][x] == 1) ok = 0;
+	need_update = 1;
 }
 
 static void move() {
 	char button = get_key_pressed();
+	need_update = 0;
 	if (button == 'w')	{
 		self_eat_check(head_y - 1, head_x);
 		head_y--;	
@@ -87,11 +90,12 @@ static void move() {
 		self_eat_check(head_y, head_x - 1);
 		head_x--;
 	}
+	if (need_update == 0) return;
+
 	is[snake_y[len - 1]][snake_x [len- 1]] = 0;
 	update_snake(&snake_x[0], head_x);
 	update_snake(&snake_y[0], head_y);
 	is[snake_y[0]][snake_x[0]] = 1;
-	return;
 }
 
 static void give_food() {
@@ -129,9 +133,9 @@ static void init() {
 	ok = 1;
 }
 
-static void very_bad_sleep() {
+static void very_bad_sleep(int x) {
 	int j = 0;
-	for (int i = 0; i < (int) 2e7; i++) {
+	for (int i = 0; i < x * (int) 2e7; i++) {
 		j++;
 	}
 }
@@ -139,7 +143,7 @@ static void very_bad_sleep() {
 void start_snake() {
 	init();
 	for(;;) {
-		very_bad_sleep();
+		very_bad_sleep(1);
 		drow();
 		move();
 		if (check() <= 0) {
@@ -147,7 +151,6 @@ void start_snake() {
 		}
 	}
 	drow();
-	very_bad_sleep();
-	very_bad_sleep();
+	very_bad_sleep(2);
 	clear_screen();
 }

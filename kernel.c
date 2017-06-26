@@ -3,6 +3,7 @@
 #include "types.h"
 
 #include "standalone_snake_game.h"
+#include <keyboard_communicator.h>
 
 // const int N = 10;
 
@@ -20,7 +21,15 @@
 void main(void) {
 	clear_screen();
 
-	start_snake();
+	//start_snake();
+	int prev = 0;
+	while (1) {
+		int c = get_pressed_button();
+		if (c != prev) {
+			printf("%d", c);
+			prev = c;
+		}
+	}
 
 	// int *b = DEF_IO_BASE1;
 	// int *a= DEF_IO_BASE;
