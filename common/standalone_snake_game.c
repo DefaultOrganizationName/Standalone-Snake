@@ -1,5 +1,4 @@
 #include <standalone_snake_game.h>
-#include <keyboard_communicator.h>
 
 static int head_x;
 static int head_y;
@@ -57,7 +56,21 @@ static char get_key_pressed_demo() {
 	if (cnt == 60) cnt = 0;
 	return 'd';	
 }
+static char codes[300];
 
+char get_pressed_button() {
+	static int codes_got = 0;
+	if (codes_got == 0) {
+		codes_got = 1;
+		for (int i = 0; i < 300; i++) codes[i] = 0;
+		codes[0x1e] = 'a';
+		codes[0x1f] = 's';
+		codes[0x20] = 'd';
+		codes[0x11] = 'w';
+	}
+	return codes[queue_pop()];
+
+}
 static char prev = 'd';
 static char get_key_pressed() {
 	char button = get_pressed_button();
@@ -133,6 +146,44 @@ static int check() {
 	return 1;
 }
 
+
+#define MAXQUEUEVALUE 5
+
+int data[MAXQUEUEVALUE];
+int first;
+int size;
+
+void queue_init()
+    {
+        int first = -1;
+        int size = 0;
+    }
+void queue_push(int val) 
+    {
+        int position;
+        if (first == -1) 
+        {
+            first = position = 0;
+        } else {
+            position = (first + size) % MAXQUEUEVALUE;
+        }
+        if (size == MAXQUEUEVALUE) 
+        {
+            first = (first + 1) % MAXQUEUEVALUE;
+        } else {
+            size++;
+        }
+        data[position] = val;
+    }
+int queue_pop() 
+    {
+        size--;
+        int old_first = first;
+        first = (first + 1) % MAXQUEUEVALUE;
+        return data[old_first];
+    }
+
+
 static void init() {
 	head_x = FIELD_LEN / 2;
 	head_y = FIELD_HEIGHT / 2;
@@ -149,14 +200,33 @@ static void init() {
 	points = 0;
 	ok = 1;
 	prev = 'd';
+	queue_init();
+
 }
+
+static inline uint8_t inb(uint16_t port) {
+    uint8_t ret;
+    asm ("inb %1, %0" : "=a"(ret) : "Nd"(port));
+    return ret;
+}
+
+
+
 
 static void very_bad_sleep(int x) {
 	int j = 0;
-	for (int i = 0; i < x * (int) 2e7; i++) {
+	int c = 0;
+	for (int i = 0; i < x * (int) 2e6; i++) {
+		if (inb(0x60) != c)	{
+			c = inb(0x60);
+			if (c > 0) queue_push(c);
+		}
 		j++;
 	}
 }
+
+
+
 
 void start_snake() {
 	init();

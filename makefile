@@ -6,7 +6,6 @@ OBJFILES = \
 	loader.o  \
 	common/screen.o  \
 	common/standalone_snake_game.o \
-	common/keyboard_communicator.o \
 	kernel.o
 
 image:
