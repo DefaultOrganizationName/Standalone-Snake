@@ -1,6 +1,10 @@
 timeout   3
 default   0
 
-title  mini_os
+title  Snake
 root   (hd0,0)
 kernel /kernel.bin
+
+title Reboot
+reboot
+
