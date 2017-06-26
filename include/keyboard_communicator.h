@@ -9,6 +9,6 @@
  / Returns 'd' if 'd' is pressed
  / Returns 0 if no one of this buttons is pressed.
  */
-int get_pressed_button();
+char get_pressed_button();
 
 #endif

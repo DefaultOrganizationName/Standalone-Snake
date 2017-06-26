@@ -1,4 +1,5 @@
 #include <standalone_snake_game.h>
+#include <keyboard_communicator.h>
 
 int head_x;
 int head_y;
@@ -47,14 +48,23 @@ static void drow() {
 	drow_field();
 }
 
-static char get_key_pressed() {
+static char get_key_pressed_demo() {
 	static int cnt = 0;
 	cnt++;
 	if (cnt >= 16 && 27 > cnt) return 's';
 	if (cnt >= 27 && 45 > cnt) return 'a';
 	if (cnt >= 45 && 60 > cnt) return 'w';
 	if (cnt == 60) cnt = 0;
-	return 'd';
+	return 'd';	
+}
+
+static char get_key_pressed() {
+	static char prev = 'd';
+	char button = get_pressed_button();
+	if (button != prev && button != 0) {
+		prev = button;
+	}
+	return prev;
 }
 
 static void update_snake(int *snake, int new_head) {
@@ -92,17 +102,17 @@ static void move() {
 	}
 	if (need_update == 0) return;
 
-	is[snake_y[len - 1]][snake_x [len- 1]] = 0;
+	is[snake_y[len - 1]][snake_x[len - 1]] = 0;
 	update_snake(&snake_x[0], head_x);
 	update_snake(&snake_y[0], head_y);
 	is[snake_y[0]][snake_x[0]] = 1;
 }
 
 static void give_food() {
-	// food_x = 1 + (head_x + 100) % (FIELD_LEN - 2);
-	// food_y = 1 + (head_y + 100) % (FIELD_HEIGHT - 2);
-	food_x = 1 + (head_x + 1) % (FIELD_LEN - 2);
-	food_y = head_y;
+	food_x = 1 + (head_x + 100) % (FIELD_LEN - 2);
+	food_y = 1 + (head_y + 100) % (FIELD_HEIGHT - 2);
+	// food_x = 1 + (head_x + 1) % (FIELD_LEN - 2);
+	// food_y = head_y;
 }
 
 static void snake_grow() {
@@ -144,11 +154,11 @@ void start_snake() {
 	init();
 	for(;;) {
 		very_bad_sleep(1);
-		drow();
 		move();
 		if (check() <= 0) {
 			break;
 		}
+		drow();
 	}
 	drow();
 	very_bad_sleep(2);
