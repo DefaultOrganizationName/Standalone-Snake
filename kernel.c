@@ -6,8 +6,13 @@
 int main(void) {
 
 	clear_screen();
-	start_snake();
-	show_points();
+	int restart = 1;
+	while (restart) {
+		start_snake();
+		show_points();
+		restart = restart_option();
+	}
+
 
 	return 0;
 }

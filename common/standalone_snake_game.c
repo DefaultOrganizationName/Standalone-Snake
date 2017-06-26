@@ -173,14 +173,14 @@ void start_snake() {
 	clear_screen();
 }
 
-static void restart_option() {
+int restart_option() {
 	char b = 0;
 	char word[] = {"\nTo restart press r\n $"};
 	for (int i = 0; word[i] != '$'; i++) putchar(word[i]);
 	while (1) {
 		b = get_key_pressed();
 		if (b == 'r') {
-			start_snake();
+			return 1;
 		}
 	}
 }
@@ -200,6 +200,4 @@ void show_points() {
 		putchar(c);
 	}
 	if (len == 0) putchar('0');
-
-	restart_option();
 }
