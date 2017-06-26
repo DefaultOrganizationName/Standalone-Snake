@@ -4,5 +4,6 @@
 #include "screen.h"
 
 void start_snake();
+void show_points();
 
 #endif

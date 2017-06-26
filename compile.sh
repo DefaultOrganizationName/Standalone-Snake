@@ -1,6 +1,5 @@
 as -o loader.o loader.s
 gcc -Iinclude -Wall -fno-builtin -nostdinc -nostdlib -o kernel.o -c kernel.c
-gcc -Iinclude -Wall -fno-builtin -nostdinc -nostdlib -o printf.o -c common/printf.c
 gcc -Iinclude -Wall -fno-builtin -nostdinc -nostdlib -o screen.o -c common/screen.c
 gcc -Iinclude -Wall -fno-builtin -nostdinc -nostdlib -o standalone_snake_game.o -c common/standalone_snake_game.c
 gcc -Iinclude -Wall -fno-builtin -nostdinc -nostdlib -o keyboard_communicator.o -c common/keyboard_communicator.c

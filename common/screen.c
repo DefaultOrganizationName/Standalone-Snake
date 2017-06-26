@@ -1,15 +1,17 @@
 #include "screen.h"
+#include <types.h>
 
-#define VRAM_SIZE (MAX_COL*MAX_ROW)	// Size of screen, in short's 
-// #define DEF_VRAM_BASE 0xb8000	// Default base for video memory
-#define DEF_VRAM_BASE 0xb8000   // Default base for video memory
+#define VRAM_SIZE (MAX_COL*MAX_ROW)
+#define DEF_VRAM_BASE 0xb8000
 
-static unsigned char curr_col = 0;
-static unsigned char curr_row = 0;
+static uint8_t curr_col = 0;
+static uint8_t curr_row = 0;
 
-// Write character at current screen location
-#define PUT(c) ( ((unsigned short *) (DEF_VRAM_BASE)) \
-	[(curr_row * MAX_COL) + curr_col] = (GREEN << 8) | (c))
+int color = GREEN;
+
+static inline void put(char c) {
+    ((uint16_t *) (DEF_VRAM_BASE))[(curr_row * MAX_COL) + curr_col] = (color << 8) | c;
+}
 
 // Place a character on next screen position
 static void cons_putc(int c)
@@ -36,11 +38,11 @@ static void cons_putc(int c)
         if (curr_col > 0) 
         {
             curr_col -= 1;
-            PUT(' ');
+            put(' ');
         }
         break;
     default:
-        PUT(c);
+        put(c);
         curr_col += 1;
         if (curr_col >= MAX_COL) 
         {
@@ -59,6 +61,18 @@ void putchar( int c )
     if (c == '\n') 
         cons_putc('\r');
     cons_putc(c);
+}
+
+void putchar_cl(int c, int new_color) {
+    int tmp = color;
+    color = new_color;
+    putchar(c);
+    color = tmp;
+}
+
+void fast_clear_screen() {
+    curr_col = 0;
+    curr_row = 0;
 }
 
 void clear_screen( void )

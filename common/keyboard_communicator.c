@@ -1,7 +1,5 @@
 #include <keyboard_communicator.h>
-
-typedef unsigned char uint8_t;
-typedef unsigned short int uint16_t;
+#include <types.h>
 
 static inline uint8_t inb(uint16_t port) {
     uint8_t ret;
@@ -18,7 +16,6 @@ static int get_scan_code() {
 		}
 	}
 }
-
 
 static char codes[300];
 
