@@ -58,8 +58,8 @@ static char get_key_pressed_demo() {
 	return 'd';	
 }
 
+static char prev = 'd';
 static char get_key_pressed() {
-	static char prev = 'd';
 	char button = get_pressed_button();
 	if (button != prev && button != 0) {
 		if ((prev == 'd' && button == 'a') || (prev == 'a' && button == 'd')) return prev;
@@ -138,11 +138,17 @@ static void init() {
 	head_y = FIELD_HEIGHT / 2;
 	give_food();
 	is[head_y][head_x] = 1;
+	for (int i = 0; i < MAX_ROW + 10; i++) for (int j = 0;j < MAX_COL + 10; j++) is[i][j] = 0;
+	for (int i = 0; i < (int)1e3; i++) {
+		snake_x[i] = 0;
+		snake_y[i] = 0;
+	}
 	snake_x[0] = head_x;
 	snake_y[0] = head_y;
 	len = 1;
 	points = 0;
 	ok = 1;
+	prev = 'd';
 }
 
 static void very_bad_sleep(int x) {
@@ -167,6 +173,18 @@ void start_snake() {
 	clear_screen();
 }
 
+static void restart_option() {
+	char b = 0;
+	char word[] = {"\nTo restart press r\n $"};
+	for (int i = 0; word[i] != '$'; i++) putchar(word[i]);
+	while (1) {
+		b = get_key_pressed();
+		if (b == 'r') {
+			start_snake();
+		}
+	}
+}
+
 void show_points() {
 	char word[] = {"Congratulations!\nYour points: $"};
 	for (int i = 0; word[i] != '$'; i++) putchar(word[i]);
@@ -182,4 +200,6 @@ void show_points() {
 		putchar(c);
 	}
 	if (len == 0) putchar('0');
+
+	restart_option();
 }

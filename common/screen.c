@@ -13,7 +13,6 @@ static inline void put(char c) {
     ((uint16_t *) (DEF_VRAM_BASE))[(curr_row * MAX_COL) + curr_col] = (color << 8) | c;
 }
 
-// Place a character on next screen position
 static void cons_putc(int c)
 {
     switch (c) 

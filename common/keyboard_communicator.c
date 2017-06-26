@@ -28,6 +28,7 @@ char get_pressed_button() {
 		codes[0x1f] = 's';
 		codes[0x20] = 'd';
 		codes[0x11] = 'w';
+		codes[0x13] = 'r';
 	}
 	return codes[get_scan_code()];
 
