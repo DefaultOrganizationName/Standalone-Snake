@@ -147,7 +147,7 @@ static int check() {
 }
 
 
-#define MAXQUEUEVALUE 5
+#define MAXQUEUEVALUE 1
 
 int data[MAXQUEUEVALUE];
 int first;
@@ -178,9 +178,11 @@ void queue_push(int val)
 int queue_pop() 
     {
         size--;
-        int old_first = first;
+        int old_first = data[first];
+        // data[first] = 0;
         first = (first + 1) % MAXQUEUEVALUE;
-        return data[old_first];
+        
+        return old_first;
     }
 
 
@@ -214,14 +216,14 @@ static inline uint8_t inb(uint16_t port) {
 
 
 static void very_bad_sleep(int x) {
-	int j = 0;
+	int j = 1;
 	int c = 0;
-	for (int i = 0; i < x * (int) 2e6; i++) {
+	for (int i = 0; i < x * (int) 2e5 * 3 ; i++) {
+		j = (i / (j + 1) ) % 17;
 		if (inb(0x60) != c)	{
 			c = inb(0x60);
 			if (c > 0) queue_push(c);
 		}
-		j++;
 	}
 }
 
@@ -232,6 +234,9 @@ void start_snake() {
 	init();
 	for(;;) {
 		very_bad_sleep(1);
+		while (size > 0) {
+			get_pressed_button();
+		}
 		move();
 		if (check() <= 0) {
 			break;
@@ -239,7 +244,7 @@ void start_snake() {
 		drow();
 	}
 	drow();
-	very_bad_sleep(2);
+	very_bad_sleep(4);
 	clear_screen();
 }
 
