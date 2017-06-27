@@ -142,8 +142,8 @@ static void give_food() {
 	food_x = 1 + (snake_x[len / 2] + 101 + random_x) % (FIELD_LEN - 2);
 	food_y = 1 + (snake_y[len / 2] + 97 + random_y) % (FIELD_HEIGHT - 2);
 	while (is[food_x][food_y] != 0) {
-		food_x = (food_x + snake_x[len / 2] + 37 + random_x) % (FIELD_LEN - 2);
-		food_y = (food_y + snake_y[len / 2] + 37 + random_y) % (FIELD_HEIGHT - 2);
+		food_x = 1 + (food_x + snake_x[len / 2] + 37 + random_x) % (FIELD_LEN - 2);
+		food_y = 1 + (food_y + snake_y[len / 2] + 37 + random_y) % (FIELD_HEIGHT - 2);
 	}
 	
 }
