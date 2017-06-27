@@ -28,6 +28,26 @@ static int ok = 1;
 
 static int points = 0;
 
+static void drow_food(int i) {
+	if (i % 5 == 0)  {
+		putchar_cl(FOOD, 4);
+		return;
+	}
+	if (i % 5 == 1)  {
+		putchar_cl(FOOD, 6);
+		return;
+	}
+	if (i % 5 == 2)  {
+		putchar_cl(FOOD, 10);
+		return;
+	}
+	if (i % 5 == 3)  {
+		putchar_cl(FOOD, 5);
+		return;
+	}
+	putchar_cl(FOOD, 9);
+	
+}
 static void drow_field() {
 	fast_clear_screen();
 	for (int i = 0; i < FIELD_LEN; i++) putchar_cl(FENCE, BLUE);
@@ -36,7 +56,7 @@ static void drow_field() {
 		putchar_cl(FENCE, BLUE);
 		for (int j = 1; j < FIELD_LEN - 1; j++) {
 			if (j == head_x && i == head_y) putchar(SNAKE_HEAD);
-			else if (i == food_y && j == food_x) putchar(FOOD);
+			else if (i == food_y && j == food_x) drow_food(i + j); // 4 2 5 6 8 
 			else if (is[i][j] == 1) putchar(SNAKE_BODY);
 			else putchar(' ');
 		}
@@ -121,15 +141,11 @@ static void move(char button) {
 static void give_food() {
 	food_x = 1 + (snake_x[len / 2] + 101 + random_x) % (FIELD_LEN - 2);
 	food_y = 1 + (snake_y[len / 2] + 97 + random_y) % (FIELD_HEIGHT - 2);
-	while (snake_x[food_x] != 0) {
-		food_x = 1 + (snake_x[len / 2] + 37 + random_x) % (FIELD_LEN - 2);
-	}
-	while (snake_x[food_x] != 0) {
-		food_y = 1 + (snake_y[len / 2] + 37 + random_y) % (FIELD_LEN - 2);
+	while (is[food_x][food_y] != 0) {
+		food_x = (food_x + snake_x[len / 2] + 37 + random_x) % (FIELD_LEN - 2);
+		food_y = (food_y + snake_y[len / 2] + 37 + random_y) % (FIELD_HEIGHT - 2);
 	}
 	
-	// food_x = 1 + (head_x + 1) % (FIELD_LEN - 2);
-	// food_y = head_y;
 }
 
 static void snake_grow() {
