@@ -35,11 +35,15 @@ static void codes_memoization() {
 }
 
 char get_pressed_button() {
-	codes_memoization();
+	// codes_memoization();
 	return codes[get_scan_code()];
 }
 
 char check_io_port() {
 	int code = inb();
 	return code > 0 ? codes[code] : 0;
+}
+
+void keyboard_init() {
+	codes_memoization();	
 }

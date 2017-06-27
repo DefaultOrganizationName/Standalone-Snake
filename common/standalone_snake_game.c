@@ -191,10 +191,17 @@ void start_snake() {
 	clear_screen();
 }
 
+static inline void show_message(char word[]) {
+	for (int i = 0; word[i] != '$'; i++) putchar(word[i]);
+}
+
+static inline void show_message2(char word[]) {
+	for (int i = 0; word[i] != '$'; i++) putchar_cl(word[i], BLUE);
+}
+
 int restart_option() {
 	char b = 0;
-	char word[] = {"\nTo restart press r\n $"};
-	for (int i = 0; word[i] != '$'; i++) putchar(word[i]);
+	show_message("\nTo restart press r\n $");
 	while (1) {
 		b = get_key_pressed();
 		if (b == 'r') {
@@ -204,8 +211,7 @@ int restart_option() {
 }
 
 void show_points() {
-	char word[] = {"Congratulations!\nYour points: $"};
-	for (int i = 0; word[i] != '$'; i++) putchar(word[i]);
+	show_message("Congratulations!\nYour points: $");
 	int p = points;
 	int arr[10];
 	len = 0;
@@ -218,4 +224,29 @@ void show_points() {
 		putchar(c);
 	}
 	if (len == 0) putchar('0');
+}
+
+void snake_menu() {
+	for (int i = 0; i < (MAX_COL / 2) - 10; i++) putchar(' ');
+	show_message2("STANDALONE SNAKE OS\n\n\n$");	
+	show_message2("Controlling during the game:\n$");
+	show_message("	w, a, s, d - for mouving\n$");
+	show_message("	r - for pause\n$");
+	show_message2("Press r to start!!!\n$");
+	for (int i = 0; i < MAX_ROW - 10; i++) putchar('\n');
+	for (int i = 0; i < MAX_COL - 50; i++) putchar(' ');
+	show_message("v1.0, made by Antonov, Glotov, Toropin$");
+	char b = 0;
+	while (1) {
+		b = get_key_pressed();
+		if (b == 'r') {
+			clear_screen();
+			for (int i = 0; i < (MAX_ROW / 2) - 1; i++) putchar('\n');
+			for (int i = 0; i < (MAX_COL / 2) - 5; i++) putchar(' ');
+			show_message("Good luck!$");
+			very_bad_sleep(50);
+			return;
+		}
+	}
+
 }
