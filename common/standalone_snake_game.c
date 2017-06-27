@@ -1,4 +1,6 @@
 #include <standalone_snake_game.h>
+#include <keyboard_communicator.h>
+#include <queue.h>
 
 static int head_x;
 static int head_y;
@@ -56,27 +58,19 @@ static char get_key_pressed_demo() {
 	if (cnt == 60) cnt = 0;
 	return 'd';	
 }
-static char codes[300];
 
-char get_pressed_button() {
-	static int codes_got = 0;
-	if (codes_got == 0) {
-		codes_got = 1;
-		for (int i = 0; i < 300; i++) codes[i] = 0;
-		codes[0x1e] = 'a';
-		codes[0x1f] = 's';
-		codes[0x20] = 'd';
-		codes[0x11] = 'w';
-	}
-	return codes[queue_pop()];
-
-}
 static char prev = 'd';
+
+static int is_to_back(char button) {
+	if ((prev == 'd' && button == 'a') || (prev == 'a' && button == 'd')) return 1;
+	if ((prev == 'w' && button == 's') || (prev == 's' && button == 'w')) return 1;
+	return 0;
+}
+
 static char get_key_pressed() {
 	char button = get_pressed_button();
 	if (button != prev && button != 0) {
-		if ((prev == 'd' && button == 'a') || (prev == 'a' && button == 'd')) return prev;
-		if ((prev == 'w' && button == 's') || (prev == 's' && button == 'w')) return prev;
+		if (is_to_back(button)) return prev;
 		prev = button;
 	}
 	return prev;
@@ -96,8 +90,7 @@ static inline void self_eat_check(int y, int x) {
 	need_update = 1;
 }
 
-static void move() {
-	char button = get_key_pressed();
+static void move(char button) {
 	need_update = 0;
 	if (button == 'w')	{
 		self_eat_check(head_y - 1, head_x);
@@ -124,8 +117,8 @@ static void move() {
 }
 
 static void give_food() {
-	food_x = 1 + (snake_x[len / 2] + 100) % (FIELD_LEN - 2);
-	food_y = 1 + (snake_y[len / 2] + 100) % (FIELD_HEIGHT - 2);
+	food_x = 1 + (snake_x[len / 2] + 101) % (FIELD_LEN - 2);
+	food_y = 1 + (snake_y[len / 2] + 97) % (FIELD_HEIGHT - 2);
 	// food_x = 1 + (head_x + 1) % (FIELD_LEN - 2);
 	// food_y = head_y;
 }
@@ -146,46 +139,6 @@ static int check() {
 	return 1;
 }
 
-
-#define MAXQUEUEVALUE 1
-
-int data[MAXQUEUEVALUE];
-int first;
-int size;
-
-void queue_init()
-    {
-        int first = -1;
-        int size = 0;
-    }
-void queue_push(int val) 
-    {
-        int position;
-        if (first == -1) 
-        {
-            first = position = 0;
-        } else {
-            position = (first + size) % MAXQUEUEVALUE;
-        }
-        if (size == MAXQUEUEVALUE) 
-        {
-            first = (first + 1) % MAXQUEUEVALUE;
-        } else {
-            size++;
-        }
-        data[position] = val;
-    }
-int queue_pop() 
-    {
-        size--;
-        int old_first = data[first];
-        // data[first] = 0;
-        first = (first + 1) % MAXQUEUEVALUE;
-        
-        return old_first;
-    }
-
-
 static void init() {
 	head_x = FIELD_LEN / 2;
 	head_y = FIELD_HEIGHT / 2;
@@ -202,49 +155,39 @@ static void init() {
 	points = 0;
 	ok = 1;
 	prev = 'd';
-	queue_init();
-
 }
-
-static inline uint8_t inb(uint16_t port) {
-    uint8_t ret;
-    asm ("inb %1, %0" : "=a"(ret) : "Nd"(port));
-    return ret;
-}
-
-
-
 
 static void very_bad_sleep(int x) {
-	int j = 1;
-	int c = 0;
-	for (int i = 0; i < x * (int) 2e5 * 3 ; i++) {
-		j = (i / (j + 1) ) % 17;
-		if (inb(0x60) != c)	{
-			c = inb(0x60);
-			if (c > 0) queue_push(c);
+	int j = 0;
+	for (int i = 0; i < x * (int) 2e6; i++) {
+		j++;
+		if ((x == 1) && (i % 5 == 0)) {
+			char new_key = check_io_port();
+			if (new_key > 0 && new_key != prev && !is_to_back(new_key)) {
+				queue_push(new_key);
+				prev = new_key;
+			}
 		}
 	}
 }
-
-
-
 
 void start_snake() {
 	init();
+
+	int stop = 0;
 	for(;;) {
 		very_bad_sleep(1);
-		while (size > 0) {
-			get_pressed_button();
-		}
-		move();
-		if (check() <= 0) {
-			break;
+
+		queue_push(get_key_pressed());
+		while ((get_size() > 0) && (stop <= 0)) {
+			move(queue_pop());
+			if (check() <= 0) stop = 1;
 		}
 		drow();
+		if (stop) break;
 	}
 	drow();
-	very_bad_sleep(4);
+	very_bad_sleep(2);
 	clear_screen();
 }
 
