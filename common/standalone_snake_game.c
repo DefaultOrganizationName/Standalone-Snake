@@ -13,6 +13,8 @@ static int snake_y[(int)1e3];
 
 static int food_x;
 static int food_y;
+static int random_x;
+static int random_y;
 
 static const int FIELD_LEN = MAX_COL - 10;
 static const int FIELD_HEIGHT = MAX_ROW;
@@ -117,8 +119,8 @@ static void move(char button) {
 }
 
 static void give_food() {
-	food_x = 1 + (snake_x[len / 2] + 101) % (FIELD_LEN - 2);
-	food_y = 1 + (snake_y[len / 2] + 97) % (FIELD_HEIGHT - 2);
+	food_x = 1 + (snake_x[len / 2] + 101 + random_x) % (FIELD_LEN - 2);
+	food_y = 1 + (snake_y[len / 2] + 97 + random_y) % (FIELD_HEIGHT - 2);
 	// food_x = 1 + (head_x + 1) % (FIELD_LEN - 2);
 	// food_y = head_y;
 }
@@ -142,6 +144,8 @@ static int check() {
 static void init() {
 	head_x = FIELD_LEN / 2;
 	head_y = FIELD_HEIGHT / 2;
+	random_x = 13;
+	random_y = 17;
 	give_food();
 	is[head_y][head_x] = 1;
 	for (int i = 0; i < MAX_ROW + 10; i++) for (int j = 0;j < MAX_COL + 10; j++) is[i][j] = 0;
@@ -166,6 +170,14 @@ static void very_bad_sleep(int x) {
 			if (new_key > 0 && new_key != prev && !is_to_back(new_key)) {
 				queue_push(new_key);
 				prev = new_key;
+				if (new_key % 2 == 0) 
+				{
+					random_x = (random_x + new_key) % 55;
+				}
+				else
+				{
+					random_y = (random_y + new_key) % 55;
+				}
 			}
 		}
 	}
