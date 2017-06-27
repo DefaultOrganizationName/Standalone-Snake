@@ -1,17 +1,19 @@
 #include <keyboard_communicator.h>
 #include <types.h>
 
-static inline uint8_t inb(uint16_t port) {
+const uint16_t IO_PORT = 0x60;
+
+static inline uint8_t inb() {
     uint8_t ret;
-    asm ("inb %1, %0" : "=a"(ret) : "Nd"(port));
+    asm ("inb %1, %0" : "=a"(ret) : "Nd"(IO_PORT));
     return ret;
 }
 
 static int get_scan_code() {
 	int c = 0;
 	for (;;) {
-		if (inb(0x60) != c)	{
-			c = inb(0x60);
+		if (inb() != c)	{
+			c = inb();
 			if (c > 0) return c;
 		}
 	}
@@ -19,7 +21,7 @@ static int get_scan_code() {
 
 static char codes[300];
 
-char get_pressed_button() {
+static void codes_memoization() {
 	static int codes_got = 0;
 	if (codes_got == 0) {
 		codes_got = 1;
@@ -29,7 +31,19 @@ char get_pressed_button() {
 		codes[0x20] = 'd';
 		codes[0x11] = 'w';
 		codes[0x13] = 'r';
-	}
-	return codes[get_scan_code()];
+	}	
+}
 
+char get_pressed_button() {
+	// codes_memoization();
+	return codes[get_scan_code()];
+}
+
+char check_io_port() {
+	int code = inb();
+	return code > 0 ? codes[code] : 0;
+}
+
+void keyboard_init() {
+	codes_memoization();	
 }

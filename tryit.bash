@@ -6,6 +6,6 @@ then
 
 	if [ $? -eq 0 ]
 	then 
-		qemu-system-i386 -vga cirrus -hda hdd.img
+		sudo qemu-system-i386 -vga cirrus -hda hdd.img
 	fi
 fi
