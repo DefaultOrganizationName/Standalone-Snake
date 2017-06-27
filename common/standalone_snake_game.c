@@ -121,6 +121,13 @@ static void move(char button) {
 static void give_food() {
 	food_x = 1 + (snake_x[len / 2] + 101 + random_x) % (FIELD_LEN - 2);
 	food_y = 1 + (snake_y[len / 2] + 97 + random_y) % (FIELD_HEIGHT - 2);
+	while (snake_x[food_x] != 0) {
+		food_x = 1 + (snake_x[len / 2] + 37 + random_x) % (FIELD_LEN - 2);
+	}
+	while (snake_x[food_x] != 0) {
+		food_y = 1 + (snake_y[len / 2] + 37 + random_y) % (FIELD_LEN - 2);
+	}
+	
 	// food_x = 1 + (head_x + 1) % (FIELD_LEN - 2);
 	// food_y = head_y;
 }
