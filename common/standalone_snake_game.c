@@ -1,5 +1,6 @@
 #include <standalone_snake_game.h>
 #include <keyboard_communicator.h>
+#include <queue.h>
 
 static int head_x;
 static int head_y;
@@ -59,11 +60,17 @@ static char get_key_pressed_demo() {
 }
 
 static char prev = 'd';
+
+static int is_to_back(char button) {
+	if ((prev == 'd' && button == 'a') || (prev == 'a' && button == 'd')) return 1;
+	if ((prev == 'w' && button == 's') || (prev == 's' && button == 'w')) return 1;
+	return 0;
+}
+
 static char get_key_pressed() {
 	char button = get_pressed_button();
 	if (button != prev && button != 0) {
-		if ((prev == 'd' && button == 'a') || (prev == 'a' && button == 'd')) return prev;
-		if ((prev == 'w' && button == 's') || (prev == 's' && button == 'w')) return prev;
+		if (is_to_back(button)) return prev;
 		prev = button;
 	}
 	return prev;
@@ -83,8 +90,7 @@ static inline void self_eat_check(int y, int x) {
 	need_update = 1;
 }
 
-static void move() {
-	char button = get_key_pressed();
+static void move(char button) {
 	need_update = 0;
 	if (button == 'w')	{
 		self_eat_check(head_y - 1, head_x);
@@ -111,8 +117,8 @@ static void move() {
 }
 
 static void give_food() {
-	food_x = 1 + (snake_x[len / 2] + 100) % (FIELD_LEN - 2);
-	food_y = 1 + (snake_y[len / 2] + 100) % (FIELD_HEIGHT - 2);
+	food_x = 1 + (snake_x[len / 2] + 101) % (FIELD_LEN - 2);
+	food_y = 1 + (snake_y[len / 2] + 97) % (FIELD_HEIGHT - 2);
 	// food_x = 1 + (head_x + 1) % (FIELD_LEN - 2);
 	// food_y = head_y;
 }
@@ -153,30 +159,49 @@ static void init() {
 
 static void very_bad_sleep(int x) {
 	int j = 0;
-	for (int i = 0; i < x * (int) 2e7; i++) {
+	for (int i = 0; i < x * (int) 2e6; i++) {
 		j++;
+		if ((x == 1) && (i % 5 == 0)) {
+			char new_key = check_io_port();
+			if (new_key > 0 && new_key != prev && !is_to_back(new_key)) {
+				queue_push(new_key);
+				prev = new_key;
+			}
+		}
 	}
 }
 
 void start_snake() {
 	init();
+
+	int stop = 0;
 	for(;;) {
 		very_bad_sleep(1);
-		move();
-		if (check() <= 0) {
-			break;
+
+		queue_push(get_key_pressed());
+		while ((get_size() > 0) && (stop <= 0)) {
+			move(queue_pop());
+			if (check() <= 0) stop = 1;
 		}
 		drow();
+		if (stop) break;
 	}
 	drow();
 	very_bad_sleep(2);
 	clear_screen();
 }
 
+static inline void show_message(char word[]) {
+	for (int i = 0; word[i] != '$'; i++) putchar(word[i]);
+}
+
+static inline void show_message2(char word[]) {
+	for (int i = 0; word[i] != '$'; i++) putchar_cl(word[i], BLUE);
+}
+
 int restart_option() {
 	char b = 0;
-	char word[] = {"\nTo restart press r\n $"};
-	for (int i = 0; word[i] != '$'; i++) putchar(word[i]);
+	show_message("\nTo restart press r\n $");
 	while (1) {
 		b = get_key_pressed();
 		if (b == 'r') {
@@ -186,8 +211,7 @@ int restart_option() {
 }
 
 void show_points() {
-	char word[] = {"Congratulations!\nYour points: $"};
-	for (int i = 0; word[i] != '$'; i++) putchar(word[i]);
+	show_message("Congratulations!\nYour points: $");
 	int p = points;
 	int arr[10];
 	len = 0;
@@ -200,4 +224,29 @@ void show_points() {
 		putchar(c);
 	}
 	if (len == 0) putchar('0');
+}
+
+void snake_menu() {
+	for (int i = 0; i < (MAX_COL / 2) - 10; i++) putchar(' ');
+	show_message2("STANDALONE SNAKE OS\n\n\n$");	
+	show_message2("Controlling during the game:\n$");
+	show_message("	w, a, s, d - for mouving\n$");
+	show_message("	r - for pause\n$");
+	show_message2("Press r to start!!!\n$");
+	for (int i = 0; i < MAX_ROW - 10; i++) putchar('\n');
+	for (int i = 0; i < MAX_COL - 50; i++) putchar(' ');
+	show_message("v1.0, made by Antonov, Glotov, Toropin$");
+	char b = 0;
+	while (1) {
+		b = get_key_pressed();
+		if (b == 'r') {
+			clear_screen();
+			for (int i = 0; i < (MAX_ROW / 2) - 1; i++) putchar('\n');
+			for (int i = 0; i < (MAX_COL / 2) - 5; i++) putchar(' ');
+			show_message("Good luck!$");
+			very_bad_sleep(50);
+			return;
+		}
+	}
+
 }
