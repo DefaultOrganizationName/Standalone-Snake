@@ -1,17 +1,17 @@
-#include <types.h>
 #include <standalone_snake_game.h>
 #include <keyboard_communicator.h>
 
 int main(void) {
-	clear_screen();
 	keyboard_init();
+
+	clear_screen();
 	snake_menu();
 	clear_screen();
-	int restart = 1;
-	while (restart) {
+
+	do {
 		start_snake();
 		show_points();
-		restart = restart_option();
-	}
+	} while (restart_option());
+
 	return 0;
 }

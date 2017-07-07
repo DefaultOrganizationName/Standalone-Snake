@@ -8,4 +8,6 @@ then
 	then 
 		sudo qemu-system-i386 -vga cirrus -hda hdd.img
 	fi
+
+	make clean
 fi

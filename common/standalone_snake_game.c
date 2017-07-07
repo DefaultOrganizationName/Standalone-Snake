@@ -48,6 +48,7 @@ static void drow_food(int i) {
 	putchar_cl(FOOD, 9);
 	
 }
+
 static void drow_field() {
 	fast_clear_screen();
 	for (int i = 0; i < FIELD_LEN; i++) putchar_cl(FENCE, BLUE);

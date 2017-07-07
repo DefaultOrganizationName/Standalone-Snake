@@ -1,6 +1,5 @@
 CC      = gcc
 CFLAGS  = -m32 -Wall -fno-builtin -nostdinc -nostdlib
-LD      = ld
 
 OBJFILES = \
 	loader.o  \
@@ -53,6 +52,6 @@ rebuild: clean all
 .c.o:
 	$(CC) -Iinclude $(CFLAGS) -o $@ -c $<
 kernel.bin: $(OBJFILES)
-	$(LD) -m elf_i386 -T linker.ld -o $@ $^
+	ld -m elf_i386 -T linker.ld -o $@ $^
 clean:
 	rm -f $(OBJFILES) hdd.img kernel.bin
