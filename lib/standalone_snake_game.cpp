@@ -1,6 +1,7 @@
-#include <standalone_snake_game.h>
-#include <keyboard_communicator.h>
-#include <queue.h>
+#include "standalone_snake_game.h"
+#include "keyboard_communicator.h"
+#include "queue.h"
+#include "easy_printf.h"
 
 static int head_x;
 static int head_y;
@@ -51,20 +52,20 @@ static void drow_food(int i) {
 
 static void drow_field() {
 	fast_clear_screen();
-	for (int i = 0; i < FIELD_LEN; i++) putchar_cl(FENCE, BLUE);
+	for (int i = 0; i < FIELD_LEN; i++) putchar_cl(FENCE, VGA_COLOR_CYAN);
 	putchar('\n');
 	for (int i = 1; i < FIELD_HEIGHT - 1; i++) {
-		putchar_cl(FENCE, BLUE);
+		putchar_cl(FENCE, VGA_COLOR_CYAN);
 		for (int j = 1; j < FIELD_LEN - 1; j++) {
 			if (j == head_x && i == head_y) putchar(SNAKE_HEAD);
 			else if (i == food_y && j == food_x) drow_food(i + j); // 4 2 5 6 8 
 			else if (is[i][j] == 1) putchar(SNAKE_BODY);
 			else putchar(' ');
 		}
-		putchar_cl(FENCE, BLUE);
+		putchar_cl(FENCE, VGA_COLOR_CYAN);
 		putchar('\n');
 	}
-	for (int i = 0; i < FIELD_LEN; i++) putchar_cl(FENCE, BLUE);
+	for (int i = 0; i < FIELD_LEN; i++) putchar_cl(FENCE, VGA_COLOR_CYAN);
 	putchar('\n');
 }
 
@@ -72,15 +73,15 @@ static void drow() {
 	drow_field();
 }
 
-static char get_key_pressed_demo() {
-	static int cnt = 0;
-	cnt++;
-	if (cnt >= 16 && 27 > cnt) return 's';
-	if (cnt >= 27 && 45 > cnt) return 'a';
-	if (cnt >= 45 && 60 > cnt) return 'w';
-	if (cnt == 60) cnt = 0;
-	return 'd';	
-}
+// static char get_key_pressed_demo() {
+// 	static int cnt = 0;
+// 	cnt++;
+// 	if (cnt >= 16 && 27 > cnt) return 's';
+// 	if (cnt >= 27 && 45 > cnt) return 'a';
+// 	if (cnt >= 45 && 60 > cnt) return 'w';
+// 	if (cnt == 60) cnt = 0;
+// 	return 'd';	
+// }
 
 static char prev = 'd';
 
@@ -223,21 +224,13 @@ void start_snake() {
 		if (stop) break;
 	}
 	drow();
-	very_bad_sleep(2);
+	very_bad_sleep(50);
 	clear_screen();
-}
-
-static inline void show_message(char word[]) {
-	for (int i = 0; word[i] != '$'; i++) putchar(word[i]);
-}
-
-static inline void show_message2(char word[]) {
-	for (int i = 0; word[i] != '$'; i++) putchar_cl(word[i], BLUE);
 }
 
 int restart_option() {
 	char b = 0;
-	show_message("\nTo restart press r\n $");
+	printf("\nTo restart press r\n");
 	while (1) {
 		b = get_key_pressed();
 		if (b == 'r') {
@@ -247,7 +240,7 @@ int restart_option() {
 }
 
 void show_points() {
-	show_message("Congratulations!\nYour points: $");
+	printf("Congratulations!\nYour points:");
 	int p = points;
 	int arr[10];
 	len = 0;
@@ -264,14 +257,14 @@ void show_points() {
 
 void snake_menu() {
 	for (int i = 0; i < (MAX_COL / 2) - 10; i++) putchar(' ');
-	show_message2("STANDALONE SNAKE OS\n\n\n$");	
-	show_message2("Controlling during the game:\n$");
-	show_message("	w, a, s, d - for mouving\n$");
-	show_message("	r - for pause\n$");
-	show_message2("Press r to start!!!\n$");
+	printf("STANDALONE SNAKE OS\n\n\n", VGA_COLOR_CYAN);	
+	printf("Controlling during the game:\n", VGA_COLOR_CYAN);
+	printf("	w, a, s, d - for mouving\n");
+	printf("	r - for pause\n");
+	printf("Press r to start!!!\n", VGA_COLOR_CYAN);
 	for (int i = 0; i < MAX_ROW - 10; i++) putchar('\n');
 	for (int i = 0; i < MAX_COL - 50; i++) putchar(' ');
-	show_message("v1.0, made by Antonov, Glotov, Toropin$");
+	printf("v1.0, made by Antonov, Glotov, Toropin");
 	char b = 0;
 	while (1) {
 		b = get_key_pressed();
@@ -279,7 +272,7 @@ void snake_menu() {
 			clear_screen();
 			for (int i = 0; i < (MAX_ROW / 2) - 1; i++) putchar('\n');
 			for (int i = 0; i < (MAX_COL / 2) - 5; i++) putchar(' ');
-			show_message("Good luck!$");
+			printf("Good luck!");
 			very_bad_sleep(50);
 			return;
 		}

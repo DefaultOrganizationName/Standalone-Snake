@@ -2,12 +2,10 @@ make all
 
 if [ $? -eq 0 ]
 then
-	sudo make image
-
+	make image
 	if [ $? -eq 0 ]
-	then 
-		sudo qemu-system-i386 -vga cirrus -hda hdd.img
+	then
+		qemu-system-i386 -cdrom os.iso
 	fi
-
 	make clean
 fi

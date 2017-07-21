@@ -1,5 +1,4 @@
 #include "screen.h"
-#include <types.h>
 
 #define VRAM_SIZE (MAX_COL*MAX_ROW)
 #define DEF_VRAM_BASE 0xb8000
@@ -7,7 +6,7 @@
 static uint8_t curr_col = 0;
 static uint8_t curr_row = 0;
 
-int color = GREEN;
+int color = VGA_COLOR_GREEN;
 
 static inline void put(char c) {
     ((uint16_t *) (DEF_VRAM_BASE))[(curr_row * MAX_COL) + curr_col] = (color << 8) | c;

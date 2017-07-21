@@ -1,9 +1,10 @@
 #ifndef _QUEUE_H
 #define _QUEUE_H
 
-#include <types.h>
+#include <stddef.h>
+#include <stdint.h>
 
-#define MAXQUEUEVALUE 10
+const size_t MAXQUEUEVALUE = 10;
 
 void queue_init();
 void queue_push(int val);

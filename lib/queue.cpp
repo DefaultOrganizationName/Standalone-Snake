@@ -1,4 +1,4 @@
-#include <queue.h>
+#include "queue.h"
 
 int data[MAXQUEUEVALUE];
 int first;
