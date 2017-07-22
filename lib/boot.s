@@ -76,7 +76,7 @@ _start:
 	runtime support to work as well.
 	*/
 
-	call fun
+	call init_gdt
 
 	/*
 	Enter the high-level kernel. The ABI requires the stack is 16-byte

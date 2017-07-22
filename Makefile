@@ -8,6 +8,7 @@ OBJFILES = \
 	lib/queue.o \
 	lib/f.o \
 	lib/easy_printf.o \
+	lib/gdt.o \
 	kernel.o
 
 all: $(TARGET).bin
