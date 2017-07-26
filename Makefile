@@ -13,6 +13,8 @@ OBJFILES = \
 	lib/idt.o \
 	lib/handler.o \
 	lib/pic.o \
+	lib/pit.o \
+	lib/time.o \
 	kernel.o
 
 all: $(TARGET).bin

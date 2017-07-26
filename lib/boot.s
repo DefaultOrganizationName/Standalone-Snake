@@ -31,6 +31,7 @@ stack is properly aligned and failure to align the stack will result in
 undefined behavior.
 */
 .section .bss
+
 .align 16
 stack_bottom:
 .skip 16384 # 16 KiB

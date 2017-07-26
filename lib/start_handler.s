@@ -6,6 +6,14 @@ on_key_pressed_start:
 	popal
 	iret
 
+.global on_timer_ticked_start
+.type on_timer_ticked_start, @function
+on_timer_ticked_start:
+	pushal
+	call on_timer_ticked
+	popal
+	iret	
+
 .global ignore_start
 .type ignore_start, @function
 ignore_start:

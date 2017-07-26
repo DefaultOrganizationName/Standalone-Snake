@@ -1,15 +1,17 @@
 #include "lib/standalone_snake_game.h"
 #include "lib/keyboard_communicator.h"
+#include "lib/pit.h"
 #include "lib/easy_printf.h"
+#include "lib/time.h"
 
 extern "C" int kernel_main() {
 
 	keyboard_init();
+	init_pit(19);	
+
+	sleep(1000000);
 
 	clear_screen();
-	
-	int a = 0;
-	while (true) {}
 
 	snake_menu();
 	clear_screen();
