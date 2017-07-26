@@ -76,8 +76,11 @@ _start:
 	runtime support to work as well.
 	*/
 
+	cli
 	call init_gdt
-
+	call init_idt
+	sti
+	
 	/*
 	Enter the high-level kernel. The ABI requires the stack is 16-byte
 	aligned at the time of the call instruction (which afterwards pushes
@@ -100,6 +103,7 @@ _start:
 	3) Jump to the hlt instruction if it ever wakes up due to a
 	   non-maskable interrupt occurring or due to system management mode.
 	*/
+
 	cli
 1:	hlt
 	jmp 1b

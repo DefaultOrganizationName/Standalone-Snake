@@ -1,10 +1,4 @@
 #include <stdint.h>
-#include "easy_printf.h"
-
-void db() {
-	printf("hello!");
-	while (true) {}
-}
 
 struct segment_descriptor_t {
 	uint16_t segment_limit_1;
@@ -54,14 +48,13 @@ void load_gdt(segment_descriptor_t *gdt_ptr, uint16_t sz) {
 	gdtr.size = sz - 1;
 	gdtr.addr = (uint32_t) gdt_ptr;
   	asm ("lgdt (%0)": : "a"(&gdtr));
-  	asm(
-    "ljmp $0x10, $reload_cs\n\t"
-    "reload_cs:\n\t"
-    "mov $0x08, %%ax\n\t"
-    "mov %%ax, %%ds\n\t"
-    :
-    :
-    : "ax");
+  	asm("ljmp $0x10, $reload_cs\n\t"
+	"reload_cs:\n\t"
+	"mov $0x8, %%ax\n\t"
+	"mov %%ax, %%ds\n\t"
+	:
+	:
+	: "ax");
 }
 
 extern "C" void init_gdt() {

@@ -1,18 +1,9 @@
 #include "keyboard_communicator.h"
 #include <stddef.h>
 #include <stdint.h>
+#include "io.h"
 
 const uint16_t IO_PORT = 0x60;
-
-static inline uint8_t inb(uint16_t port) {
-    uint8_t ret;
-    asm ("inb %1, %0" : "=a"(ret) : "Nd"(port));
-    return ret;
-}
-
-static inline void outb(uint16_t port, uint8_t val) {
-    asm ( "outb %0, %1" : : "a"(val), "Nd"(port) );
-}
 
 void disable_cursor() {
     outb(0x3D4, 0x0A); 

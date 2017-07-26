@@ -6,9 +6,13 @@ OBJFILES = \
 	lib/standalone_snake_game.o \
 	lib/keyboard_communicator.o \
 	lib/queue.o \
-	lib/f.o \
 	lib/easy_printf.o \
 	lib/gdt.o \
+	lib/io.o \
+	lib/start_handler.o \
+	lib/idt.o \
+	lib/handler.o \
+	lib/pic.o \
 	kernel.o
 
 all: $(TARGET).bin
@@ -29,7 +33,6 @@ image:
 	@cp grub.cfg isodir/boot/grub/grub.cfg
 	@grub-mkrescue -o $(TARGET).iso isodir
 	@echo "\niso image done successful!\n"
-
 
 clean:
 	rm -f -r $(OBJFILES) $(TARGET).iso $(TARGET).bin isodir/
