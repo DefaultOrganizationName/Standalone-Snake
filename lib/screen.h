@@ -9,5 +9,6 @@ void clear_screen();
 void fast_clear_screen();
 void putchar( int c );
 void putchar_cl(int, int);
+void putchar_coord(char, uint8_t, uint8_t);
 
 #endif

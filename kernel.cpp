@@ -7,9 +7,7 @@
 extern "C" int kernel_main() {
 
 	keyboard_init();
-	init_pit(19);	
-
-	sleep(1000000);
+	init_pit(1500);	
 
 	clear_screen();
 

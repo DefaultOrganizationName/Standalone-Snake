@@ -15,6 +15,7 @@ OBJFILES = \
 	lib/pic.o \
 	lib/pit.o \
 	lib/time.o \
+	lib/execution_states.o \
 	kernel.o
 
 all: $(TARGET).bin
@@ -37,4 +38,4 @@ image:
 	@echo "\niso image done successful!\n"
 
 clean:
-	rm -f -r $(OBJFILES) $(TARGET).iso $(TARGET).bin isodir/
+	rm -f -r $(OBJFILES)  $(TARGET).bin isodir/

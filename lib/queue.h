@@ -4,8 +4,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-const size_t MAXQUEUEVALUE = 10;
-
 void queue_init();
 void queue_push(int val);
 int queue_pop();

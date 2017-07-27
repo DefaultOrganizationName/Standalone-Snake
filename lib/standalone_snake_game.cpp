@@ -2,23 +2,26 @@
 #include "keyboard_communicator.h"
 #include "queue.h"
 #include "easy_printf.h"
+#include "time.h"
+#include "execution_states.h"
+#include <stdint.h>
 
-static int head_x;
-static int head_y;
+static uint8_t head_x;
+static uint8_t head_y;
 static int len;
 
-static int is[MAX_ROW + 10][MAX_COL + 10];
+static bool is[MAX_ROW + 10][MAX_COL + 10];
 
-static int snake_x[(int)1e3];
-static int snake_y[(int)1e3];
+static uint8_t snake_x[(int)1e3];
+static uint8_t snake_y[(int)1e3];
 
-static int food_x;
-static int food_y;
-static int random_x;
-static int random_y;
+static uint8_t food_x;
+static uint8_t food_y;
+static uint8_t random_x;
+static uint8_t random_y;
 
-static const int FIELD_LEN = MAX_COL - 10;
-static const int FIELD_HEIGHT = MAX_ROW;
+static const uint8_t FIELD_LEN = MAX_COL - 10;
+static const uint8_t FIELD_HEIGHT = MAX_ROW;
 
 static const char FENCE = '#';
 static const char SNAKE_HEAD = '0';
@@ -30,36 +33,38 @@ static int ok = 1;
 static int points = 0;
 
 static void drow_food(int i) {
-	if (i % 5 == 0)  {
-		putchar_cl(FOOD, 4);
-		return;
-	}
-	if (i % 5 == 1)  {
-		putchar_cl(FOOD, 6);
-		return;
-	}
-	if (i % 5 == 2)  {
-		putchar_cl(FOOD, 10);
-		return;
-	}
-	if (i % 5 == 3)  {
-		putchar_cl(FOOD, 5);
-		return;
-	}
-	putchar_cl(FOOD, 9);
-	
+	switch (i % 5) {
+		case 0:
+			putchar_cl(FOOD, VGA_COLOR_RED);
+			return;
+		case 1:
+			putchar_cl(FOOD, VGA_COLOR_BROWN);
+			return;
+		case 2:
+			putchar_cl(FOOD, VGA_COLOR_LIGHT_GREEN);
+			return;
+		case 3:
+			putchar_cl(FOOD, VGA_COLOR_MAGENTA);
+			return;
+		default:
+			putchar_cl(FOOD, VGA_COLOR_LIGHT_BLUE);
+			return;
+	}	
 }
 
 static void drow_field() {
 	fast_clear_screen();
 	for (int i = 0; i < FIELD_LEN; i++) putchar_cl(FENCE, VGA_COLOR_CYAN);
+	putchar(' ');
+	putchar(' ');
+	printf(points);
 	putchar('\n');
 	for (int i = 1; i < FIELD_HEIGHT - 1; i++) {
 		putchar_cl(FENCE, VGA_COLOR_CYAN);
 		for (int j = 1; j < FIELD_LEN - 1; j++) {
 			if (j == head_x && i == head_y) putchar(SNAKE_HEAD);
 			else if (i == food_y && j == food_x) drow_food(i + j); // 4 2 5 6 8 
-			else if (is[i][j] == 1) putchar(SNAKE_BODY);
+			else if (is[i][j]) putchar(SNAKE_BODY);
 			else putchar(' ');
 		}
 		putchar_cl(FENCE, VGA_COLOR_CYAN);
@@ -91,16 +96,16 @@ static int is_to_back(char button) {
 	return 0;
 }
 
-static char get_key_pressed() {
-	char button = get_pressed_button();
-	if (button != prev && button != 0) {
-		if (is_to_back(button)) return prev;
-		prev = button;
-	}
-	return prev;
-}
+// static char get_key_pressed() {
+// 	char button = get_pressed_button();
+// 	if (button != prev && button != 0) {
+// 		if (is_to_back(button)) return prev;
+// 		prev = button;
+// 	}
+// 	return prev;
+// }
 
-static void update_snake(int *snake, int new_head) {
+static void update_snake(uint8_t *snake, uint8_t new_head) {
 	for (int i = len - 2;; i--) {
 		if (i < 0) break;
 		snake[i + 1] = snake[i];
@@ -112,6 +117,39 @@ int need_update;
 static inline void self_eat_check(int y, int x) {
 	if (is[y][x] == 1) ok = 0;
 	need_update = 1;
+}
+
+struct point {
+	uint8_t x, y;
+	point(uint8_t x, uint8_t y) : x(x), y(y) {}
+	point() : x(0), y(0) {}
+};
+
+static void give_food() {
+	food_x = 1 + (snake_x[len / 2] + 101 + random_x) % (FIELD_LEN - 2);
+	food_y = 1 + (snake_y[len / 2] + 97 + random_y) % (FIELD_HEIGHT - 2);	
+}
+
+static void snake_grow() {
+	snake_x[len] = snake_x[len - 1];
+	snake_y[len] = snake_y[len - 1];
+	len++;
+}
+
+static int check() {
+	if (head_x <= 0 || head_x >= FIELD_LEN - 1 || head_y <= 0 || head_y >= FIELD_HEIGHT - 1 || ok <= 0) return 0;
+	if (head_x == food_x && head_y == food_y) {
+		points++;
+		snake_grow();
+		give_food();
+	}
+	return 1;
+}
+
+void fast_redraw(uint8_t *snake_x, uint8_t *snake_y) {
+	putchar_coord(' ', snake_y[len - 1], snake_x[len - 1]);
+	putchar_coord(SNAKE_BODY, snake_y[1], snake_x[1]);
+	putchar_coord(SNAKE_HEAD, snake_y[0], snake_x[0]);
 }
 
 static void move(char button) {
@@ -140,32 +178,12 @@ static void move(char button) {
 	is[snake_y[0]][snake_x[0]] = 1;
 }
 
-static void give_food() {
-	food_x = 1 + (snake_x[len / 2] + 101 + random_x) % (FIELD_LEN - 2);
-	food_y = 1 + (snake_y[len / 2] + 97 + random_y) % (FIELD_HEIGHT - 2);	
-}
-
-static void snake_grow() {
-	snake_x[len] = snake_x[len - 1];
-	snake_y[len] = snake_y[len - 1];
-	len++;
-}
-
-static int check() {
-	if (head_x <= 0 || head_x >= FIELD_LEN - 1 || head_y <= 0 || head_y >= FIELD_HEIGHT - 1 || ok <= 0) return 0;
-	if (head_x == food_x && head_y == food_y) {
-		points++;
-		snake_grow();
-		give_food();
-	}
-	return 1;
-}
-
 static void init() {
 	head_x = FIELD_LEN / 2;
 	head_y = FIELD_HEIGHT / 2;
 	random_x = 13;
 	random_y = 17;
+	update_state(GAME);
 	give_food();
 	is[head_y][head_x] = 1;
 	for (int i = 0; i < MAX_ROW + 10; i++) for (int j = 0;j < MAX_COL + 10; j++) is[i][j] = 0;
@@ -179,38 +197,42 @@ static void init() {
 	points = 0;
 	ok = 1;
 	prev = 'd';
+	queue_push(prev);
 }
 
-static void very_bad_sleep(int x) {
-	int j = 0;
-	for (int i = 0; i < x * (int) 2e6; i++) {
-		j++;
-		if ((x == 1) && (i % 5 == 0)) {
-			char new_key = check_io_port();
-			if (new_key > 0 && new_key != prev && !is_to_back(new_key)) {
-				queue_push(new_key);
-				prev = new_key;
-				if (new_key % 2 == 0) 
-				{
-					random_x = (random_x + new_key) % 55;
-				}
-				else
-				{
-					random_y = (random_y + new_key) % 55;
-				}
-			}
+void add_snake_action(char new_key) {
+	if (new_key > 0 && new_key != prev && !is_to_back(new_key)) {
+		queue_push(new_key);
+		prev = new_key;
+		if (new_key % 2 == 0) 
+		{
+			random_x = (random_x + new_key) % 55;
+		}
+		else
+		{
+			random_y = (random_y + new_key) % 55;
 		}
 	}
 }
+
+// static void very_bad_sleep(int x) {
+// 	int j = 0;
+// 	for (int i = 0; i < x * (int) 2e6; i++) {
+// 		j++;
+// 		if ((x == 1) && (i % 5 == 0)) {
+// 			add_snake_action(check_io_port());
+// 		}
+// 	}
+// }
 
 void start_snake() {
 	init();
 
 	int stop = 0;
 	for(;;) {
-		very_bad_sleep(1);
-
-		queue_push(get_key_pressed());
+		sleep(1);
+		queue_push(prev);
+		//add_snake_action(prev);
 		while ((get_size() > 0) && (stop <= 0)) {
 			move(queue_pop());
 			if (check() <= 0) stop = 1;
@@ -219,19 +241,14 @@ void start_snake() {
 		if (stop) break;
 	}
 	drow();
-	very_bad_sleep(50);
+	sleep(5);
 	clear_screen();
 }
 
 int restart_option() {
-	char b = 0;
 	printf("\nTo restart press r\n");
-	while (1) {
-		b = get_key_pressed();
-		if (b == 'r') {
-			return 1;
-		}
-	}
+	wait_for_button_press('r');
+	return 1;
 }
 
 void show_points() {
@@ -260,17 +277,11 @@ void snake_menu() {
 	for (int i = 0; i < MAX_ROW - 10; i++) putchar('\n');
 	for (int i = 0; i < MAX_COL - 50; i++) putchar(' ');
 	printf("v1.0, made by Antonov, Glotov, Toropin");
-	char b = 0;
-	while (1) {
-		b = get_key_pressed();
-		if (b == 'r') {
-			clear_screen();
-			for (int i = 0; i < (MAX_ROW / 2) - 1; i++) putchar('\n');
-			for (int i = 0; i < (MAX_COL / 2) - 5; i++) putchar(' ');
-			printf("Good luck!");
-			very_bad_sleep(50);
-			return;
-		}
-	}
-
+	wait_for_button_press('r');
+	clear_screen();
+	for (int i = 0; i < (MAX_ROW / 2) - 1; i++) putchar('\n');
+	for (int i = 0; i < (MAX_COL / 2) - 5; i++) putchar(' ');
+	printf("Good luck!");
+	sleep(5);
+	return;
 }

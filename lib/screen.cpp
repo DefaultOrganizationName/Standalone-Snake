@@ -68,6 +68,18 @@ void putchar_cl(int c, int new_color) {
     color = tmp;
 }
 
+void putchar_coord(char c, uint8_t y, uint8_t x) {
+    uint8_t col = x;
+    uint8_t row = y;
+    uint8_t tmp_col = curr_col;
+    uint8_t tmp_row = curr_row;
+    curr_row = row;
+    curr_col = col;
+    putchar(c);
+    curr_row = tmp_row;
+    curr_col = tmp_col;
+}
+
 void fast_clear_screen() {
     curr_col = 0;
     curr_row = 0;

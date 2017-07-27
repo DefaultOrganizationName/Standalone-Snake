@@ -1,4 +1,5 @@
 #include "time.h"
+#include "execution_states.h"
 
 uint64_t sec_count = 0;
 
@@ -16,4 +17,12 @@ void sleep(uint64_t secs) {
 
 void inc_time() {
 	sec_count++;
+}
+
+void wait_for_button_press(char button) {
+	update_state(WAIT_FOR_BUTTON);
+	update_checker(button);
+	while (get_state() != GAME) {
+		asm ("hlt");
+	}
 }

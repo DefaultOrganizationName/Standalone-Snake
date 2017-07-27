@@ -6,5 +6,6 @@
 void inc_time();
 void sleep(uint64_t secs);
 uint64_t get_sec_count();
+void wait_for_button_press(char);
 
 #endif

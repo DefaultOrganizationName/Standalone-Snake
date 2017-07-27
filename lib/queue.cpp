@@ -1,5 +1,7 @@
 #include "queue.h"
 
+const size_t MAXQUEUEVALUE = 50;
+
 int data[MAXQUEUEVALUE];
 int first;
 size_t size;
