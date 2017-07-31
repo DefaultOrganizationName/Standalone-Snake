@@ -1,6 +1,4 @@
 #include "standalone_snake_game.h"
-#include "keyboard_communicator.h"
-#include "queue.h"
 #include "easy_printf.h"
 #include "time.h"
 #include "execution_states.h"
@@ -78,16 +76,6 @@ static void drow() {
 	drow_field();
 }
 
-// static char get_key_pressed_demo() {
-// 	static int cnt = 0;
-// 	cnt++;
-// 	if (cnt >= 16 && 27 > cnt) return 's';
-// 	if (cnt >= 27 && 45 > cnt) return 'a';
-// 	if (cnt >= 45 && 60 > cnt) return 'w';
-// 	if (cnt == 60) cnt = 0;
-// 	return 'd';	
-// }
-
 static char prev = 'd';
 
 static int is_to_back(char button) {
@@ -95,15 +83,6 @@ static int is_to_back(char button) {
 	if ((prev == 'w' && button == 's') || (prev == 's' && button == 'w')) return 1;
 	return 0;
 }
-
-// static char get_key_pressed() {
-// 	char button = get_pressed_button();
-// 	if (button != prev && button != 0) {
-// 		if (is_to_back(button)) return prev;
-// 		prev = button;
-// 	}
-// 	return prev;
-// }
 
 static void update_snake(uint8_t *snake, uint8_t new_head) {
 	for (int i = len - 2;; i--) {
@@ -119,12 +98,6 @@ static inline void self_eat_check(int y, int x) {
 	need_update = 1;
 }
 
-struct point {
-	uint8_t x, y;
-	point(uint8_t x, uint8_t y) : x(x), y(y) {}
-	point() : x(0), y(0) {}
-};
-
 static void give_food() {
 	food_x = 1 + (snake_x[len / 2] + 101 + random_x) % (FIELD_LEN - 2);
 	food_y = 1 + (snake_y[len / 2] + 97 + random_y) % (FIELD_HEIGHT - 2);	
@@ -136,7 +109,7 @@ static void snake_grow() {
 	len++;
 }
 
-static int check() {
+static bool check() {
 	if (head_x <= 0 || head_x >= FIELD_LEN - 1 || head_y <= 0 || head_y >= FIELD_HEIGHT - 1 || ok <= 0) return 0;
 	if (head_x == food_x && head_y == food_y) {
 		points++;
@@ -146,11 +119,13 @@ static int check() {
 	return 1;
 }
 
-void fast_redraw(uint8_t *snake_x, uint8_t *snake_y) {
+static void fast_redraw() {
 	putchar_coord(' ', snake_y[len - 1], snake_x[len - 1]);
 	putchar_coord(SNAKE_BODY, snake_y[1], snake_x[1]);
-	putchar_coord(SNAKE_HEAD, snake_y[0], snake_x[0]);
+	putchar_coord(SNAKE_HEAD, head_y, head_x);
 }
+
+static bool mooved_on_frame;
 
 static void move(char button) {
 	need_update = 0;
@@ -172,17 +147,22 @@ static void move(char button) {
 	}
 	if (need_update == 0) return;
 
+	mooved_on_frame = true;
 	is[snake_y[len - 1]][snake_x[len - 1]] = 0;
 	update_snake(&snake_x[0], head_x);
 	update_snake(&snake_y[0], head_y);
 	is[snake_y[0]][snake_x[0]] = 1;
+	// if (len > 1) fast_redraw();
 }
+
+static int stop = 0;
 
 static void init() {
 	head_x = FIELD_LEN / 2;
 	head_y = FIELD_HEIGHT / 2;
 	random_x = 13;
 	random_y = 17;
+	stop = 0;
 	update_state(GAME);
 	give_food();
 	is[head_y][head_x] = 1;
@@ -197,12 +177,12 @@ static void init() {
 	points = 0;
 	ok = 1;
 	prev = 'd';
-	queue_push(prev);
 }
 
-void add_snake_action(char new_key) {
+void game::on_key_pressed(char new_key) {
 	if (new_key > 0 && new_key != prev && !is_to_back(new_key)) {
-		queue_push(new_key);
+		move(new_key);
+		if (!check()) stop = 1;
 		prev = new_key;
 		if (new_key % 2 == 0) 
 		{
@@ -215,43 +195,32 @@ void add_snake_action(char new_key) {
 	}
 }
 
-// static void very_bad_sleep(int x) {
-// 	int j = 0;
-// 	for (int i = 0; i < x * (int) 2e6; i++) {
-// 		j++;
-// 		if ((x == 1) && (i % 5 == 0)) {
-// 			add_snake_action(check_io_port());
-// 		}
-// 	}
-// }
-
-void start_snake() {
+void game::start_snake() {
 	init();
 
-	int stop = 0;
 	for(;;) {
+		mooved_on_frame = false;
+
 		sleep(1);
-		queue_push(prev);
-		//add_snake_action(prev);
-		while ((get_size() > 0) && (stop <= 0)) {
-			move(queue_pop());
-			if (check() <= 0) stop = 1;
+
+		if (!mooved_on_frame) {
+			move(prev);
 		}
+		if (!check() || stop) break;
 		drow();
-		if (stop) break;
 	}
 	drow();
 	sleep(5);
 	clear_screen();
 }
 
-int restart_option() {
+int game::restart_option() {
 	printf("\nTo restart press r\n");
 	wait_for_button_press('r');
 	return 1;
 }
 
-void show_points() {
+void game::show_points() {
 	printf("Congratulations!\nYour points:");
 	int p = points;
 	int arr[10];
@@ -267,7 +236,7 @@ void show_points() {
 	if (len == 0) putchar('0');
 }
 
-void snake_menu() {
+void game::snake_menu() {
 	for (int i = 0; i < (MAX_COL / 2) - 10; i++) putchar(' ');
 	printf("STANDALONE SNAKE OS\n\n\n", VGA_COLOR_CYAN);	
 	printf("Controlling during the game:\n", VGA_COLOR_CYAN);

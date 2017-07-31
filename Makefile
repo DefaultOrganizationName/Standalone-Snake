@@ -5,7 +5,6 @@ OBJFILES = \
 	lib/screen.o  \
 	lib/standalone_snake_game.o \
 	lib/keyboard_communicator.o \
-	lib/queue.o \
 	lib/easy_printf.o \
 	lib/gdt.o \
 	lib/io.o \

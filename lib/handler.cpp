@@ -10,7 +10,7 @@ extern "C" void on_key_pressed() {
 	char pressed = get_pressed_button();
 	switch (get_state()) {
 		case GAME:
-			add_snake_action(pressed);
+			game::on_key_pressed(pressed);
 			break;
 		case WAIT_FOR_BUTTON:
 			if (check_key_pressed(pressed)) {

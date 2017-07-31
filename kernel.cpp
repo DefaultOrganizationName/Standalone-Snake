@@ -11,13 +11,13 @@ extern "C" int kernel_main() {
 
 	clear_screen();
 
-	snake_menu();
+	game::snake_menu();
 	clear_screen();
 
 	do {
-		start_snake();
-		show_points();
-	} while (restart_option());
+		game::start_snake();
+		game::show_points();
+	} while (game::restart_option());
 
 	return 0;
 }
